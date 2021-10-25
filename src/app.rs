@@ -1,6 +1,9 @@
-use yew_router::Switch;
+use crate::home::Home;
+use crate::track::Track;
+use yew::prelude::*;
+use yew_router::{prelude::*, route::Route, switch::Permissive, Switch};
 
-#[derive(Switch, Clone, Copy, PartialEq, Eq)]
+#[derive(Switch, Clone, PartialEq)]
 pub enum AppRoute {
     #[to = "/login"]
     Login,
@@ -18,6 +21,8 @@ pub enum AppRoute {
     Track,
     #[to = "/"]
     Home,
+    #[to = "/404"]
+    PageNotFound(Permissive<String>),
 }
 
 impl Into<String> for AppRoute {
@@ -31,6 +36,52 @@ impl Into<String> for AppRoute {
             AppRoute::Donate => String::from("Donate"),
             AppRoute::Track => String::from("Track"),
             AppRoute::Home => String::from("Home"),
+            AppRoute::PageNotFound(perm) => {
+                String::from(format!("PageNotFound {}", perm.0.unwrap()))
+            }
+        }
+    }
+}
+
+pub type AppRouter = Router<AppRoute>;
+
+pub enum Msg {}
+
+pub struct Main {
+    link: ComponentLink<Self>,
+}
+
+impl Component for Main {
+    type Message = Msg;
+    type Properties = ();
+
+    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        Main { link }
+    }
+
+    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+        false
+    }
+
+    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+        false
+    }
+
+    fn view(&self) -> Html {
+        html! {
+            <AppRouter render=AppRouter::render(Self::switch) redirect=AppRouter::redirect(|route: Route| {
+                AppRoute::PageNotFound(Permissive(Some(route.route)))
+            }) />
+        }
+    }
+}
+
+impl Main {
+    fn switch(switch: AppRoute) -> Html {
+        match switch {
+            AppRoute::Home => html! { <Home /> },
+            AppRoute::Track => html! { <Track /> },
+            _ => html! { <Home /> },
         }
     }
 }

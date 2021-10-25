@@ -7,6 +7,9 @@ pub mod nav;
 // Home page
 pub mod home;
 
+// Tracking page
+pub mod track;
+
 fn main() {
-    yew::start_app::<home::Home>();
+    yew::start_app::<app::Main>();
 }

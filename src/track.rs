@@ -3,18 +3,18 @@ use crate::nav::Nav;
 use yew::prelude::*;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum HomeMsg {}
+pub enum TrackMsg {}
 
-pub struct Home {
+pub struct Track {
     link: ComponentLink<Self>,
 }
 
-impl Component for Home {
-    type Message = HomeMsg;
+impl Component for Track {
+    type Message = TrackMsg;
     type Properties = ();
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self { link }
+        Track {link}
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
@@ -27,8 +27,8 @@ impl Component for Home {
 
     fn view(&self) -> Html {
         html! {
-            <div id="home" class="content">
-                <Nav route=AppRoute::Home />
+            <div id="track" class="content">
+                <Nav route=AppRoute::Track />
             </div>
         }
     }
