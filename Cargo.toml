@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 yew = "0.18"
 yew-router = "0.15"
+nittei-common = {version="0.1", git="https://github.com/aftix/nittei-common"}
