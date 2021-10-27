@@ -27,9 +27,11 @@ impl Component for Home {
 
     fn view(&self) -> Html {
         html! {
-            <div id="home" class="content">
+            <>
                 <Nav route=AppRoute::Home />
-            </div>
+                <main id="home" class="content">
+                </main>
+            </>
         }
     }
 }

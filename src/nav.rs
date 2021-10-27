@@ -3,7 +3,9 @@ use yew::prelude::*;
 use yew_router::components::RouterAnchor;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum NavMsg {}
+pub enum NavMsg {
+    Hide,
+}
 
 #[derive(Clone, PartialEq, Properties)]
 pub struct NavProps {
@@ -14,6 +16,7 @@ pub struct NavProps {
 pub struct Nav {
     link: ComponentLink<Self>,
     props: NavProps,
+    active: bool,
 }
 
 impl Component for Nav {
@@ -21,11 +24,20 @@ impl Component for Nav {
     type Properties = NavProps;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self { props, link }
+        Self {
+            props,
+            link,
+            active: false,
+        }
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        false
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        match msg {
+            NavMsg::Hide => {
+                self.active = !self.active;
+                true
+            }
+        }
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
@@ -41,34 +53,35 @@ impl Component for Nav {
         let home_class = if self.props.route == AppRoute::Home {
             "navcurrent"
         } else {
-            "navnotcurrent"
+            ""
         };
         let track_class = if self.props.route == AppRoute::Track {
             "navcurrent"
         } else {
-            "navnotcurrent"
+            ""
         };
         let feed_class = if self.props.route == AppRoute::Feed {
             "navcurrent"
         } else {
-            "navnotcurrent"
+            ""
         };
         let about_class = if self.props.route == AppRoute::About {
             "navcurrent"
         } else {
-            "navnotcurrent"
+            ""
         };
         let donate_class = if self.props.route == AppRoute::Donate {
             "navcurrent"
         } else {
-            "navnotcurrent"
+            ""
         };
         let login_class = if self.props.route == AppRoute::Login {
             "navcurrent"
         } else {
-            "navnotcurrent"
+            ""
         };
 
+        let nav_class = if self.active { "navactive" } else { "" };
         let home_text: String = AppRoute::Home.into();
         let track_text: String = AppRoute::Track.into();
         let feed_text: String = AppRoute::Feed.into();
@@ -77,7 +90,10 @@ impl Component for Nav {
         let login_text: String = AppRoute::Login.into();
 
         html! {
-            <nav>
+            <nav class=nav_class>
+                <button onclick=self.link.callback(|_| NavMsg::Hide)>
+                    <img src="res/minilogo.svg" alt="Nittei Mini Logo" />
+                </button>
                 <ul>
                     <li class=home_class><Anchor route=AppRoute::Home>{ home_text }</Anchor></li>
                     <li class=track_class><Anchor route=AppRoute::Track>{ track_text }</Anchor></li>

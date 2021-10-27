@@ -1,0 +1,53 @@
+@import "palette"
+@import "text"
+
+nav
+  width: 100%
+  background-color: $color_navbg
+  color: $color_navfg
+  display: flex
+  flex-flow: row nowrap
+  justify-content: space-between
+  margin: 0px
+  padding: 0px
+  position: absolute
+  top: 0px
+  left: 0px
+  height: 8%
+
+nav button
+  flex-basis: 20%
+  background-color: $color-primary
+  border: 0px
+
+nav button img
+  height: 100%
+  position: relative
+  left: 0px
+  top: 0px
+  width: 100%
+
+nav ul
+  display: flex
+  flex-flow: row nowrap
+  justify-content: flex-end
+  width: 90%
+  margin: auto
+  height: 100%
+  font-size: 18pt
+
+nav li
+  background-color: $color_navitembg
+  max-width: 20%
+  min-width: 10%
+  text-align: center
+  list-style-type: none
+  align-self: center
+
+nav li:hover, .content nav .navcurrent
+  color: $color_navhoverfg
+  background-color: $color_navhoverbg
+
+nav a
+  text-decoration: none
+  color: inherit

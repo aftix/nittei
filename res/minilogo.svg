@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="95.25mm"
+   viewBox="0 0 210 95.25"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="minilogo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.77058782"
+     inkscape:cx="175.83979"
+     inkscape:cy="342.5956"
+     inkscape:window-width="1918"
+     inkscape:window-height="1059"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     height="100mm">
+    <sodipodi:guide
+       position="-379.06126,36.738729"
+       orientation="1,0"
+       id="guide1446" />
+    <sodipodi:guide
+       position="-379.06125,111.5896"
+       orientation="1,0"
+       id="guide1448" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:151.967px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#82d173;fill-opacity:1;stroke-width:0.791494"
+       x="-15.412541"
+       y="111.42089"
+       id="text4543"
+       transform="scale(1.1713591,0.8537092)"><tspan
+         id="tspan4541"
+         style="font-size:151.967px;fill:#82d173;fill-opacity:1;stroke-width:0.791494"
+         x="-15.412541"
+         y="111.42089"
+         sodipodi:role="line">N</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:55.2287px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;stroke-width:0.739668"
+       x="93.22612"
+       y="43.723774"
+       id="text62260"
+       transform="scale(1.1013266,0.90799585)"><tspan
+         sodipodi:role="line"
+         id="tspan62258"
+         style="fill:#ffffff;stroke-width:0.739668"
+         x="93.22612"
+         y="43.723774">ittei</tspan><tspan
+         sodipodi:role="line"
+         style="fill:#ffffff;stroke-width:0.739668"
+         x="93.22612"
+         y="112.75967"
+         id="tspan4373" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:50.6556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;stroke-width:0.791494"
+       x="78.63839"
+       y="104.12175"
+       id="text72084"
+       transform="scale(1.1713591,0.8537092)"><tspan
+         sodipodi:role="line"
+         id="tspan72082"
+         style="font-size:50.6556px;fill:#ffffff;stroke-width:0.791494"
+         x="78.63839"
+         y="104.12175">日程</tspan></text>
+  </g>
+</svg>

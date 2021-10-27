@@ -19,10 +19,10 @@ pub enum AppRoute {
     Donate,
     #[to = "/track"]
     Track,
-    #[to = "/"]
-    Home,
     #[to = "/404"]
     PageNotFound(Permissive<String>),
+    #[to = "/!"]
+    Home,
 }
 
 impl Into<String> for AppRoute {
