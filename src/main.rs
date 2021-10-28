@@ -10,6 +10,12 @@ pub mod home;
 // Tracking page
 pub mod track;
 
+// Login page
+pub mod login;
+
+// Registration page
+pub mod register;
+
 fn main() {
     yew::start_app::<app::Main>();
 }

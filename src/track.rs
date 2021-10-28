@@ -27,9 +27,11 @@ impl Component for Track {
 
     fn view(&self) -> Html {
         html! {
-            <div id="track" class="content">
+            <>
                 <Nav route=AppRoute::Track />
-            </div>
+                <main class="content" id="track">
+                </main>
+            </>
         }
     }
 }

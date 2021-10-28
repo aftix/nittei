@@ -15,3 +15,9 @@ create sign up page
 direct to feed if logged in by default
 finish home page with placeholder text
 make footer which will fit in grid
+Make login page actually submit form
+Make register page form
+Check password strength
+check for active session
+check for remember me
+remember me button

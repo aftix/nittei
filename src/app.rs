@@ -1,4 +1,6 @@
 use crate::home::Home;
+use crate::login::Login;
+use crate::register::Register;
 use crate::track::Track;
 use yew::prelude::*;
 use yew_router::{prelude::*, route::Route, switch::Permissive, Switch};
@@ -80,6 +82,8 @@ impl Main {
     fn switch(switch: AppRoute) -> Html {
         match switch {
             AppRoute::Home => html! { <Home /> },
+            AppRoute::Login => html! { <Login /> },
+            AppRoute::Register => html! { <Register /> },
             AppRoute::Track => html! { <Track /> },
             _ => html! { <Home /> },
         }
