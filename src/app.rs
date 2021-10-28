@@ -48,7 +48,7 @@ pub type AppRouter = Router<AppRoute>;
 pub enum Msg {}
 
 pub struct Main {
-    link: ComponentLink<Self>,
+    _link: ComponentLink<Self>,
 }
 
 impl Component for Main {
@@ -56,7 +56,7 @@ impl Component for Main {
     type Properties = ();
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Main { link }
+        Main { _link: link }
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {

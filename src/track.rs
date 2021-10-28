@@ -6,7 +6,7 @@ use yew::prelude::*;
 pub enum TrackMsg {}
 
 pub struct Track {
-    link: ComponentLink<Self>,
+    _link: ComponentLink<Self>,
 }
 
 impl Component for Track {
@@ -14,7 +14,7 @@ impl Component for Track {
     type Properties = ();
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Track {link}
+        Self { _link: link }
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {

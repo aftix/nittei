@@ -2,11 +2,18 @@ use crate::app::AppRoute;
 use crate::nav::Nav;
 use yew::prelude::*;
 
+mod action;
+mod what;
+mod why;
+use action::*;
+use what::*;
+use why::*;
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum HomeMsg {}
 
 pub struct Home {
-    link: ComponentLink<Self>,
+    _link: ComponentLink<Self>,
 }
 
 impl Component for Home {
@@ -14,7 +21,7 @@ impl Component for Home {
     type Properties = ();
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self { link }
+        Self { _link: link }
     }
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
@@ -30,6 +37,9 @@ impl Component for Home {
             <>
                 <Nav route=AppRoute::Home />
                 <main id="home" class="content">
+                    <What />
+                    <Why />
+                    <Action />
                 </main>
             </>
         }

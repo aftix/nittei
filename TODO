@@ -6,3 +6,12 @@ calendar
 leaderboards
 User IDs, user authentication tokens
 make into PWA
+create user pages
+create feeds
+create posts
+create timer page
+create leaderboards
+create sign up page
+direct to feed if logged in by default
+finish home page with placeholder text
+make footer which will fit in grid
