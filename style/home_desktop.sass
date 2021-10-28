@@ -1,0 +1,26 @@
+@import "palette"
+@import "text"
+
+#home
+  display: grid
+  grid-template-columns: repeat(3, 1fr)
+  grid-template-rows: repeat(3, 1fr)
+  width: min(1300px, 84%)
+  margin-left: auto
+  margin-right: auto
+
+#home div
+  background-color: $color-secondary
+  border-radius: 10px
+
+#home-what
+  grid-column: 1
+  grid-row: 1
+
+#home-why
+  grid-column: 2
+  grid-row: 2
+
+#home-action
+  grid-column: 3
+  grid-row: 3
