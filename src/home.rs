@@ -2,6 +2,7 @@ use crate::app::AppRoute;
 use crate::nav::Nav;
 use yew::prelude::*;
 
+// Components for use on home page
 mod action;
 mod what;
 mod why;

@@ -5,6 +5,7 @@ use crate::track::Track;
 use yew::prelude::*;
 use yew_router::{prelude::*, route::Route, switch::Permissive, Switch};
 
+// All the routes available to the user
 #[derive(Switch, Clone, PartialEq)]
 pub enum AppRoute {
     #[to = "/login"]
@@ -45,10 +46,13 @@ impl Into<String> for AppRoute {
     }
 }
 
+// QOL
 pub type AppRouter = Router<AppRoute>;
 
+// Main page messages
 pub enum Msg {}
 
+// Overall page component containing everything else
 pub struct Main {
     _link: ComponentLink<Self>,
 }
@@ -70,6 +74,7 @@ impl Component for Main {
     }
 
     fn view(&self) -> Html {
+        // Render whatever page the URL bar says to
         html! {
             <AppRouter render=AppRouter::render(Self::switch) redirect=AppRouter::redirect(|route: Route| {
                 AppRoute::PageNotFound(Permissive(Some(route.route)))
@@ -79,6 +84,7 @@ impl Component for Main {
 }
 
 impl Main {
+    // Display the right component based on what route is in use
     fn switch(switch: AppRoute) -> Html {
         match switch {
             AppRoute::Home => html! { <Home /> },
