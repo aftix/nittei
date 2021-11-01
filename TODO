@@ -22,3 +22,5 @@ check for active session
 check for remember me
 remember me button
 more comments
+Navigate to user page on login
+Change navbar if session is active

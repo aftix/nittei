@@ -2,6 +2,8 @@ use crate::home::Home;
 use crate::login::Login;
 use crate::register::Register;
 use crate::track::Track;
+use html_escape::encode_text;
+use url_escape::decode;
 use yew::prelude::*;
 use yew_router::{prelude::*, route::Route, switch::Permissive, Switch};
 
@@ -14,6 +16,8 @@ pub enum AppRoute {
     Register,
     #[to = "/account"]
     Account,
+    #[to = "/user/{username}"]
+    UserPage(String),
     #[to = "/feed"]
     Feed,
     #[to = "/about"]
@@ -34,6 +38,7 @@ impl Into<String> for AppRoute {
             AppRoute::Login => String::from("Login"),
             AppRoute::Register => String::from("Register"),
             AppRoute::Account => String::from("Account"),
+            AppRoute::UserPage(s) => encode_text(&decode(&s)).to_string(),
             AppRoute::Feed => String::from("Feed"),
             AppRoute::About => String::from("About"),
             AppRoute::Donate => String::from("Donate"),
