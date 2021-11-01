@@ -13,19 +13,25 @@ pub fn session_refresh() {
     });
 }
 
+// Loop to renew session keys.
 async fn session_refresh_loop() {
     let key: gloo::storage::Result<AuthToken> = SessionStorage::get("session_key");
     if key.is_err() {
         return;
     }
     let key = key.unwrap();
+    let jwt = key.to_string();
 
     let req = Request::get(&format!("{}/auth/renew", consts::URL))
         .header("Content-Type", "application/x-renew-request")
-        .header("Authorization", &format!("Bearer {}", key.jwt()))
-        .body("");
+        .header("Authorization", &format!("Bearer {}", jwt));
     let resp = req.send().await;
     if resp.is_err() {
+        // No connection, try again in 3 seconds
+        spawn_local(async {
+            TimeoutFuture::new(1000 * 3).await;
+            session_refresh_loop().await;
+        });
         return;
     }
     let resp = resp.unwrap();
@@ -48,6 +54,7 @@ async fn session_refresh_loop() {
         return;
     }
 
+    // Renew succeeded, do it again in 4 minutes
     spawn_local(async {
         TimeoutFuture::new(1000 * 60 * 4).await;
         session_refresh_loop().await;

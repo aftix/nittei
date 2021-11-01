@@ -6,8 +6,7 @@ use gloo::storage::{SessionStorage, Storage};
 use nittei_common::auth::*;
 use reqwasm::http::Request;
 use ron;
-use web_sys::HtmlInputElement;
-use web_sys::MouseEvent;
+use web_sys::{HtmlInputElement, MouseEvent};
 use yew::prelude::*;
 use yewtil::future::LinkFuture;
 
@@ -16,12 +15,14 @@ pub enum LoginMsg {
     Login,
     LoginRecieved(LoginResponse),
     LoginFailed,
+    Disconnected,
     Missing,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum LoginState {
     Normal,
+    Disconnected,
     Failed,
     Missing,
     LockedOut,
@@ -33,6 +34,7 @@ impl Into<String> for LoginState {
     fn into(self) -> String {
         match self {
             LoginState::Normal => String::new(),
+            LoginState::Disconnected => String::from("Disconnected from network"),
             LoginState::Failed => String::from("Internal Server Error"),
             LoginState::Missing => String::from("Missing field value!"),
             LoginState::LockedOut => String::from("Too many attempts. Please wait."),
@@ -58,7 +60,7 @@ async fn login_request(username: String, password: String) -> LoginMsg {
         .body(&ron_request);
     let resp = req.send().await;
     if resp.is_err() {
-        return LoginMsg::LoginFailed;
+        return LoginMsg::Disconnected;
     }
     let resp = resp.unwrap();
     if resp.status() != 200 {
@@ -66,7 +68,7 @@ async fn login_request(username: String, password: String) -> LoginMsg {
     }
 
     let resp = resp.text().await;
-    if let Err(_) = resp {
+    if resp.is_err() {
         return LoginMsg::LoginFailed;
     }
     let resp = resp.unwrap();
@@ -100,19 +102,23 @@ impl Component for Login {
                 self.link.send_future(async move {
                     let userbox = userref.cast::<HtmlInputElement>();
                     let passbox = passref.cast::<HtmlInputElement>();
-                    if None == userbox || None == passbox {
+                    if userbox.is_none() || passbox.is_none() {
                         return LoginMsg::LoginFailed;
                     }
                     let userbox = userbox.unwrap();
                     let passbox = passbox.unwrap();
-                    let username = String::from(userbox.value());
-                    let password = String::from(passbox.value());
+                    let username = userbox.value();
+                    let password = passbox.value();
                     if username.len() == 0 || password.len() == 0 {
                         return LoginMsg::Missing;
                     }
                     login_request(username, password).await
                 });
                 false
+            }
+            LoginMsg::Disconnected => {
+                self.state = LoginState::Disconnected;
+                true
             }
             LoginMsg::LoginRecieved(resp) => {
                 match resp {
@@ -134,12 +140,10 @@ impl Component for Login {
             }
             LoginMsg::LoginFailed => {
                 self.state = LoginState::Failed;
-                console_web::log!("Login Failed");
                 true
             }
             LoginMsg::Missing => {
                 self.state = LoginState::Missing;
-                console_web::log!("Fields missing!");
                 true
             }
         }
