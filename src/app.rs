@@ -1,6 +1,7 @@
 use crate::home::Home;
 use crate::login::Login;
 use crate::register::Register;
+use crate::timers;
 use crate::track::Track;
 use html_escape::encode_text;
 use url_escape::decode;
@@ -67,6 +68,8 @@ impl Component for Main {
     type Properties = ();
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        // Start a time to refresh the session when page is first loaded
+        timers::session_refresh();
         Main { _link: link }
     }
 

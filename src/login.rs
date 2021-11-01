@@ -2,6 +2,7 @@ use crate::app::AppRoute;
 use crate::consts;
 use crate::nav::{Anchor, Nav};
 use crate::timers;
+use crate::util;
 use gloo::storage::{SessionStorage, Storage};
 use nittei_common::auth::*;
 use reqwasm::http::Request;
@@ -49,6 +50,7 @@ pub struct Login {
     state: LoginState,
     userref: NodeRef,
     passref: NodeRef,
+    rememberref: NodeRef,
 }
 
 // use reqwasm to do a login API call
@@ -91,6 +93,7 @@ impl Component for Login {
             state: LoginState::Normal,
             userref: NodeRef::default(),
             passref: NodeRef::default(),
+            rememberref: NodeRef::default(),
         }
     }
 
@@ -126,13 +129,33 @@ impl Component for Login {
                     LoginResponse::LockedOut => self.state = LoginState::LockedOut,
                     LoginResponse::PasswordWrong => self.state = LoginState::BadPassword,
                     LoginResponse::UsernameInvalid => self.state = LoginState::BadUser,
-                    LoginResponse::Success(token) => {
-                        if SessionStorage::set("session_key", token).is_err() {
+                    LoginResponse::Success(token, claim) => {
+                        if SessionStorage::set("session_key", token).is_err()
+                            || SessionStorage::set("session", claim).is_err()
+                        {
                             self.state = LoginState::Failed;
                         } else {
                             timers::session_refresh();
-                            let window = web_sys::window().expect("No window exists");
-                            window.location().set_href("/").expect("Failed to navigate");
+                            let checkbox = self.rememberref.cast::<HtmlInputElement>();
+                            let user = self.userref.cast::<HtmlInputElement>();
+                            let pass = self.passref.cast::<HtmlInputElement>();
+
+                            if let Some(user) = user {
+                                if let Some(pass) = pass {
+                                    if let Some(check) = checkbox {
+                                        if check.checked() {
+                                            util::request_persistence(
+                                                user.value(),
+                                                pass.value(),
+                                                "/",
+                                            );
+                                        }
+                                    }
+                                }
+                            } else {
+                                let window = web_sys::window().expect("No window exists");
+                                window.location().set_href("/").expect("Failed to navigate");
+                            }
                         }
                     }
                 };
@@ -169,6 +192,10 @@ impl Component for Login {
                         <input type="text" id="unamebox" name="username" ref=self.userref.clone() />
                         <label for="passbox">{ "Password" }</label>
                         <input type="password" id="passbox" name="password" ref=self.passref.clone() />
+                        <div id="login-remember">
+                            <input type="checkbox" id="rememberme" name="rememberme" ref=self.rememberref.clone() />
+                            <label for="rememberme">{ "Remember Me" }</label>
+                        </div>
                         <button id="loginsubmit" type="submit" onclick=cb>{ "Log In" }</button>
                     </form>
                     // Only display error if text is not empty

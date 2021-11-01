@@ -1,7 +1,7 @@
 use crate::app::AppRoute;
 use crate::consts;
 use crate::nav::Nav;
-use crate::timers;
+use crate::util;
 use email_address_parser::EmailAddress;
 use gloo::storage::{SessionStorage, Storage};
 use nittei_common::auth::{RegisterRequest, RegisterResponse};
@@ -43,6 +43,7 @@ pub struct Register {
     userref: NodeRef,
     passref: NodeRef,
     pass2ref: NodeRef,
+    rememberref: NodeRef,
     state: RegisterState,
 }
 
@@ -89,6 +90,7 @@ impl Component for Register {
             userref: NodeRef::default(),
             passref: NodeRef::default(),
             pass2ref: NodeRef::default(),
+            rememberref: NodeRef::default(),
             state: RegisterState::default(),
         }
     }
@@ -360,13 +362,32 @@ impl Component for Register {
                         self.state.bademail = true;
                         true
                     }
-                    RegisterResponse::Success(token) => {
-                        if SessionStorage::set("session_key", token).is_err() {
+                    RegisterResponse::Success(token, claim) => {
+                        if SessionStorage::set("session_key", token).is_err()
+                            || SessionStorage::set("session", claim).is_err()
+                        {
                             self.state.server_error = true;
                         } else {
-                            timers::session_refresh();
-                            let window = web_sys::window().expect("No window exists");
-                            window.location().set_href("/").expect("Failed to navigate");
+                            let checkbox = self.rememberref.cast::<HtmlInputElement>();
+                            let user = self.userref.cast::<HtmlInputElement>();
+                            let pass = self.passref.cast::<HtmlInputElement>();
+
+                            if let Some(user) = user {
+                                if let Some(pass) = pass {
+                                    if let Some(check) = checkbox {
+                                        if check.checked() {
+                                            util::request_persistence(
+                                                user.value(),
+                                                pass.value(),
+                                                "/",
+                                            );
+                                        }
+                                    }
+                                }
+                            } else {
+                                let window = web_sys::window().expect("No window exists");
+                                window.location().set_href("/").expect("Failed to navigate");
+                            }
                         }
                         false
                     }
@@ -426,6 +447,10 @@ impl Component for Register {
                         <label for="passbox2">{ "Re-enter password" }</label>
                         <input type="password" id="passbox2" name="password2" ref=self.pass2ref.clone() onkeyup=pass2_cb />
                         <p class="failuretext" style=if self.state.mismatched_password { "" } else { "display: none;" }>{ "Mismatched passwords!" }</p>
+                        <div id="register-remember">
+                            <input type="checkbox" id="rememberme-register" name="rememberme" ref=self.rememberref.clone() />
+                            <label for="rememberme-register">{ "Remember Me" }</label>
+                        </div>
                         <button id="registersubmit" type="submit" onclick=cb>{ "Register" }</button>
                     </form>
                     <p class="failuretext" style=if failure_text.len() == 0 { "display: none;" } else { "" }>{ failure_text }</p>

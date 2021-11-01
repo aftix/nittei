@@ -1,5 +1,3 @@
-Make multiple pages
-have navcurrent actually be current
 User Logins
 Nav show user id instead of login
 calendar
@@ -11,16 +9,10 @@ create feeds
 create posts
 create timer page
 create leaderboards
-create sign up page
 direct to feed if logged in by default
-finish home page with placeholder text
 make footer which will fit in grid
-Make login page actually submit form
-Make register page form
-Check password strength
 check for active session
 check for remember me
-remember me button
 more comments
 Navigate to user page on login
 Change navbar if session is active

@@ -1,6 +1,8 @@
 pub mod consts;
 pub mod timers;
 
+pub mod util;
+
 // The overall app, all the pages, etc
 pub mod app;
 

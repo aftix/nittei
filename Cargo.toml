@@ -10,7 +10,7 @@ yew = "~0.18"
 yew-router = "~0.15"
 yewtil = "~0.4"
 gloo = {version="~0.4", features=["futures"]}
-nittei-common = {version="~0.1.12", git="https://github.com/aftix/nittei-common"}
+nittei-common = {version="~0.1.17", git="https://github.com/aftix/nittei-common"}
 qr_code = "~1.1"
 passwords = {version="~3.1", features=["common-password"]}
 email-address-parser = "~1.0"
@@ -22,6 +22,7 @@ console-web = "~0.1"
 reqwasm = "~0.2"
 jsonwebtoken = "~7.2"
 wasm-bindgen-futures = "~0.4"
+serde = {version="~1.0", features=["derive"]}
 
 [dependencies.getrandom]
 features=["js"]
