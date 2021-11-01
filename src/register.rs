@@ -1,17 +1,26 @@
 use crate::app::AppRoute;
+use crate::consts;
 use crate::nav::Nav;
+use crate::timers;
 use email_address_parser::EmailAddress;
+use gloo::storage::{SessionStorage, Storage};
+use nittei_common::auth::{RegisterRequest, RegisterResponse};
 use passwords::{analyzer, scorer};
+use reqwasm::http::Request;
 use web_sys::{HtmlInputElement, KeyboardEvent, MouseEvent};
 use yew::prelude::*;
+use yewtil::future::LinkFuture;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone)]
 pub enum RegisterMsg {
     Register,
     EmailTyped,
     UserTyped,
     PasswordTyped,
     Password2Typed,
+    Disconnected,
+    Failed,
+    RegisterRecieved(RegisterResponse),
 }
 
 #[derive(Default)]
@@ -24,6 +33,8 @@ struct RegisterState {
     mismatched_password: bool,
     disconnected: bool,
     server_error: bool,
+    user_taken: bool,
+    email_taken: bool,
 }
 
 pub struct Register {
@@ -33,6 +44,38 @@ pub struct Register {
     passref: NodeRef,
     pass2ref: NodeRef,
     state: RegisterState,
+}
+
+async fn register_request(email: String, username: String, password: String) -> RegisterMsg {
+    let ron_request = RegisterRequest {
+        email,
+        username,
+        password,
+    };
+    let ron_request = ron::to_string(&ron_request).expect("Should serialize");
+    let req = Request::post(&format!("{}/auth/register", consts::URL))
+        .header("Content-Type", "application/x-register-request")
+        .body(&ron_request);
+    let resp = req.send().await;
+    if resp.is_err() {
+        return RegisterMsg::Disconnected;
+    }
+    let resp = resp.unwrap();
+    if resp.status() != 200 {
+        return RegisterMsg::Failed;
+    }
+
+    let resp = resp.text().await;
+    if resp.is_err() {
+        return RegisterMsg::Failed;
+    }
+
+    let resp = ron::from_str::<RegisterResponse>(&resp.unwrap());
+    if resp.is_err() {
+        RegisterMsg::Failed
+    } else {
+        RegisterMsg::RegisterRecieved(resp.unwrap())
+    }
 }
 
 impl Component for Register {
@@ -112,7 +155,8 @@ impl Component for Register {
                     return fail;
                 }
 
-                // TODO: Send register request
+                self.link
+                    .send_future(async move { register_request(email, user, password).await });
 
                 false
             }
@@ -270,6 +314,64 @@ impl Component for Register {
                     }
                 }
             }
+            RegisterMsg::Failed => {
+                self.state.server_error = true;
+                true
+            }
+            RegisterMsg::Disconnected => {
+                self.state.disconnected = true;
+                true
+            }
+            RegisterMsg::RegisterRecieved(resp) => {
+                self.state.server_error = false;
+                self.state.disconnected = false;
+                self.state.email_taken = false;
+                self.state.user_taken = false;
+                self.state.baduser = false;
+                self.state.badpassword = false;
+                self.state.bademail = false;
+
+                match resp {
+                    RegisterResponse::UsernameTaken => {
+                        self.state.user_taken = true;
+                        true
+                    }
+                    RegisterResponse::EmailTaken => {
+                        self.state.email_taken = true;
+                        true
+                    }
+                    RegisterResponse::Lockout => {
+                        self.state.server_error = true;
+                        true
+                    }
+                    RegisterResponse::InvalidRequest => {
+                        self.state.server_error = true;
+                        true
+                    }
+                    RegisterResponse::InvalidUsername => {
+                        self.state.baduser = true;
+                        true
+                    }
+                    RegisterResponse::WeakPassword => {
+                        self.state.badpassword = true;
+                        true
+                    }
+                    RegisterResponse::InvalidEmail => {
+                        self.state.bademail = true;
+                        true
+                    }
+                    RegisterResponse::Success(token) => {
+                        if SessionStorage::set("session_key", token).is_err() {
+                            self.state.server_error = true;
+                        } else {
+                            timers::session_refresh();
+                            let window = web_sys::window().expect("No window exists");
+                            window.location().set_href("/").expect("Failed to navigate");
+                        }
+                        false
+                    }
+                }
+            }
         }
     }
 
@@ -311,9 +413,11 @@ impl Component for Register {
                         <label for="emailbox">{ "Email" }</label>
                         <input type="text" id="emailbox" name="email" ref=self.emailref.clone() onkeyup=email_cb />
                         <p class="failuretext" style=if self.state.bademail { "" } else { "display: none;"}>{ "Invaild email address!" }</p>
+                        <p class="failuretext" style=if self.state.email_taken { "" } else { "display: none;" }>{ "Email taken!" }</p>
                         <label for="unamebox">{ "Username" }</label>
                         <input type="text" id="unamebox" name="username" ref=self.userref.clone() onkeyup=user_cb />
                         <p class="failuretext" style=if self.state.baduser { "" } else { "display: none;" }>{ "Invalid username!" }</p>
+                        <p class="failuretext" style=if self.state.user_taken { "" } else { "display: none;" }>{ "Username taken!" }</p>
                         <label for="passbox">{ "Password" }</label>
                         <input type="password" id="passbox" name="password" ref=self.passref.clone() onkeyup=pass_cb />
                         <p class="failuretext" style=if self.state.shortpassword { "" } else { "display: none;" }>{ "Password must be at least 8 characters." }</p>

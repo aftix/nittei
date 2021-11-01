@@ -1,0 +1,45 @@
+@import "palette"
+@import "text"
+
+nav
+  width: 100%
+  background-color: $color_navbg
+  color: $color_navfg
+  display: flex
+  flex-flow: column nowrap
+  justify-content: flex-start
+
+nav button
+  flex-basis: 100%
+  background-color: $color_primary
+  border: 0px
+
+nav button img
+  width: 100%
+
+nav ul
+  display: none
+
+nav.navactive button
+  flex-basis: 20%
+
+nav.navactive ul
+  width: 100%
+  display: flex
+  flex-flow: column nowrap
+
+nav li
+  width: 80%
+  font-size: 18pt
+  text-align: center
+  list-style-type: none
+  align-self: center
+
+nav li:hover, nav .navcurrent
+  color: $color_navhoverfg
+  background-color: $color_navhoverbg
+
+nav a
+  text-decoration: none
+  color: inherit
+
