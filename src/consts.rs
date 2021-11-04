@@ -1,2 +1,1 @@
-
-pub const URL: &'static str = "http://localhost:8000";
+pub const URL: &str = "http://localhost:8000";

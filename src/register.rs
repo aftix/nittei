@@ -9,7 +9,6 @@ use passwords::{analyzer, scorer};
 use reqwasm::http::Request;
 use web_sys::{HtmlInputElement, KeyboardEvent, MouseEvent};
 use yew::prelude::*;
-use yewtil::future::LinkFuture;
 
 #[derive(Clone)]
 pub enum RegisterMsg {
@@ -38,7 +37,6 @@ struct RegisterState {
 }
 
 pub struct Register {
-    link: ComponentLink<Self>,
     emailref: NodeRef,
     userref: NodeRef,
     passref: NodeRef,
@@ -83,9 +81,8 @@ impl Component for Register {
     type Message = RegisterMsg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            link,
             emailref: NodeRef::default(),
             userref: NodeRef::default(),
             passref: NodeRef::default(),
@@ -95,7 +92,7 @@ impl Component for Register {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             RegisterMsg::Register => {
                 if self.state.bademail
@@ -122,13 +119,13 @@ impl Component for Register {
                 let mut fail = false;
 
                 let email = emailbox.unwrap().value();
-                if email.len() == 0 || !EmailAddress::is_valid(&email, None) {
+                if email.is_empty() || !EmailAddress::is_valid(&email, None) {
                     self.state.bademail = true;
                     fail = true;
                 }
 
                 let user = userbox.unwrap().value();
-                if user.len() == 0 || user.len() > 30 {
+                if user.is_empty() || user.len() > 30 {
                     self.state.baduser = true;
                     fail = true;
                 }
@@ -157,7 +154,7 @@ impl Component for Register {
                     return fail;
                 }
 
-                self.link
+                ctx.link()
                     .send_future(async move { register_request(email, user, password).await });
 
                 false
@@ -168,22 +165,14 @@ impl Component for Register {
                     return false;
                 }
                 let email = emailbox.unwrap().value();
-                if email.len() == 0 || !EmailAddress::is_valid(&email, None) {
+                if email.is_empty() || !EmailAddress::is_valid(&email, None) {
                     let laststate = self.state.bademail;
                     self.state.bademail = true;
-                    if laststate != true {
-                        true
-                    } else {
-                        false
-                    }
+                    !laststate
                 } else {
                     let laststate = self.state.bademail;
                     self.state.bademail = false;
-                    if laststate != false {
-                        true
-                    } else {
-                        false
-                    }
+                    laststate
                 }
             }
             RegisterMsg::UserTyped => {
@@ -193,22 +182,14 @@ impl Component for Register {
                 }
                 let userbox = userbox.unwrap();
                 let username = userbox.value();
-                if username.len() == 0 || username.len() > 30 {
+                if username.is_empty() || username.len() > 30 {
                     let laststate = self.state.baduser;
                     self.state.baduser = true;
-                    if laststate != true {
-                        true
-                    } else {
-                        false
-                    }
+                    !laststate
                 } else {
                     let laststate = self.state.baduser;
                     self.state.baduser = false;
-                    if laststate != false {
-                        true
-                    } else {
-                        false
-                    }
+                    laststate
                 }
             }
             RegisterMsg::PasswordTyped => {
@@ -224,13 +205,13 @@ impl Component for Register {
                 if password != password2 {
                     let laststate = self.state.mismatched_password;
                     self.state.mismatched_password = true;
-                    if laststate != true {
+                    if !laststate {
                         mismatched_render = true;
                     }
                 } else {
                     let laststate = self.state.mismatched_password;
                     self.state.mismatched_password = false;
-                    if laststate != false {
+                    if laststate {
                         mismatched_render = true;
                     }
                 }
@@ -239,15 +220,11 @@ impl Component for Register {
                     let laststate = self.state.shortpassword;
                     self.state.shortpassword = true;
                     self.state.longpassword = false;
-                    if laststate != true {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return !laststate;
                 } else {
                     let laststate = self.state.shortpassword;
                     self.state.shortpassword = false;
-                    if laststate != false {
+                    if laststate {
                         mismatched_render = true;
                     }
                 }
@@ -255,7 +232,7 @@ impl Component for Register {
                 if password.len() > 30 {
                     let laststate = self.state.longpassword;
                     self.state.longpassword = true;
-                    if laststate != true {
+                    if !laststate {
                         return true;
                     } else {
                         return mismatched_render;
@@ -263,7 +240,7 @@ impl Component for Register {
                 } else {
                     let laststate = self.state.longpassword;
                     self.state.longpassword = false;
-                    if laststate != false {
+                    if laststate {
                         mismatched_render = true;
                     }
                 }
@@ -274,7 +251,7 @@ impl Component for Register {
                 if scored < 70.0 {
                     let laststate = self.state.badpassword;
                     self.state.badpassword = true;
-                    if laststate != true {
+                    if !laststate {
                         true
                     } else {
                         mismatched_render
@@ -282,7 +259,7 @@ impl Component for Register {
                 } else {
                     let laststate = self.state.badpassword;
                     self.state.badpassword = false;
-                    if laststate != false {
+                    if laststate {
                         true
                     } else {
                         mismatched_render
@@ -301,19 +278,11 @@ impl Component for Register {
                 if password != password2 {
                     let laststate = self.state.mismatched_password;
                     self.state.mismatched_password = true;
-                    if laststate != true {
-                        true
-                    } else {
-                        false
-                    }
+                    !laststate
                 } else {
                     let laststate = self.state.mismatched_password;
                     self.state.mismatched_password = false;
-                    if laststate != false {
-                        true
-                    } else {
-                        false
-                    }
+                    laststate
                 }
             }
             RegisterMsg::Failed => {
@@ -376,18 +345,12 @@ impl Component for Register {
                                 if let Some(pass) = pass {
                                     if let Some(check) = checkbox {
                                         if check.checked() {
-                                            util::request_persistence(
-                                                user.value(),
-                                                pass.value(),
-                                                "/",
-                                            );
+                                            util::request_persistence(user.value(), pass.value());
                                         }
                                     }
                                 }
-                            } else {
-                                let window = web_sys::window().expect("No window exists");
-                                window.location().set_href("/").expect("Failed to navigate");
                             }
+                            yew_router::replace_route(AppRoute::Home);
                         }
                         false
                     }
@@ -396,27 +359,23 @@ impl Component for Register {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
-    }
-
-    fn view(&self) -> Html {
-        let cb = self.link.callback(|e: MouseEvent| {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let cb = ctx.link().callback(|e: MouseEvent| {
             e.prevent_default();
             RegisterMsg::Register
         });
 
-        let email_cb = self
-            .link
+        let email_cb = ctx
+            .link()
             .callback(|_: KeyboardEvent| RegisterMsg::EmailTyped);
-        let user_cb = self
-            .link
+        let user_cb = ctx
+            .link()
             .callback(|_: KeyboardEvent| RegisterMsg::UserTyped);
-        let pass_cb = self
-            .link
+        let pass_cb = ctx
+            .link()
             .callback(|_: KeyboardEvent| RegisterMsg::PasswordTyped);
-        let pass2_cb = self
-            .link
+        let pass2_cb = ctx
+            .link()
             .callback(|_: KeyboardEvent| RegisterMsg::Password2Typed);
 
         let failure_text = if self.state.disconnected {
@@ -428,32 +387,32 @@ impl Component for Register {
         };
         html! {
             <>
-                <Nav route=AppRoute::Register />
+                <Nav route={AppRoute::Register} />
                 <main id="register" class="content">
                     <form id="registerform">
                         <label for="emailbox">{ "Email" }</label>
-                        <input type="text" id="emailbox" name="email" ref=self.emailref.clone() onkeyup=email_cb />
-                        <p class="failuretext" style=if self.state.bademail { "" } else { "display: none;"}>{ "Invaild email address!" }</p>
-                        <p class="failuretext" style=if self.state.email_taken { "" } else { "display: none;" }>{ "Email taken!" }</p>
+                        <input type="text" id="emailbox" name="email" ref={self.emailref.clone()} onkeyup={email_cb} />
+                        <p class="failuretext" style={if self.state.bademail { "" } else { "display: none;"}}>{ "Invaild email address!" }</p>
+                        <p class="failuretext" style={if self.state.email_taken { "" } else { "display: none;" }}>{ "Email taken!" }</p>
                         <label for="unamebox">{ "Username" }</label>
-                        <input type="text" id="unamebox" name="username" ref=self.userref.clone() onkeyup=user_cb />
-                        <p class="failuretext" style=if self.state.baduser { "" } else { "display: none;" }>{ "Invalid username!" }</p>
-                        <p class="failuretext" style=if self.state.user_taken { "" } else { "display: none;" }>{ "Username taken!" }</p>
+                        <input type="text" id="unamebox" name="username" ref={self.userref.clone()} onkeyup={user_cb} />
+                        <p class="failuretext" style={if self.state.baduser { "" } else { "display: none;" }}>{ "Invalid username!" }</p>
+                        <p class="failuretext" style={if self.state.user_taken { "" } else { "display: none;" }}>{ "Username taken!" }</p>
                         <label for="passbox">{ "Password" }</label>
-                        <input type="password" id="passbox" name="password" ref=self.passref.clone() onkeyup=pass_cb />
-                        <p class="failuretext" style=if self.state.shortpassword { "" } else { "display: none;" }>{ "Password must be at least 8 characters." }</p>
-                        <p class="failuretext" style=if self.state.longpassword { "" } else { "display: none;" }>{ "Password must be no longer than 30 characters." }</p>
-                        <p class="failuretext" style=if self.state.badpassword { "" } else { "display: none;" }>{ "Password too weak!" }</p>
+                        <input type="password" id="passbox" name="password" ref={self.passref.clone()} onkeyup={pass_cb} />
+                        <p class="failuretext" style={if self.state.shortpassword { "" } else { "display: none;" }}>{ "Password must be at least 8 characters." }</p>
+                        <p class="failuretext" style={if self.state.longpassword { "" } else { "display: none;" }}>{ "Password must be no longer than 30 characters." }</p>
+                        <p class="failuretext" style={if self.state.badpassword { "" } else { "display: none;" }}>{ "Password too weak!" }</p>
                         <label for="passbox2">{ "Re-enter password" }</label>
-                        <input type="password" id="passbox2" name="password2" ref=self.pass2ref.clone() onkeyup=pass2_cb />
-                        <p class="failuretext" style=if self.state.mismatched_password { "" } else { "display: none;" }>{ "Mismatched passwords!" }</p>
+                        <input type="password" id="passbox2" name="password2" ref={self.pass2ref.clone()} onkeyup={pass2_cb} />
+                        <p class="failuretext" style={if self.state.mismatched_password { "" } else { "display: none;" }}>{ "Mismatched passwords!" }</p>
                         <div id="register-remember">
-                            <input type="checkbox" id="rememberme-register" name="rememberme" ref=self.rememberref.clone() />
+                            <input type="checkbox" id="rememberme-register" name="rememberme" ref={self.rememberref.clone()} />
                             <label for="rememberme-register">{ "Remember Me" }</label>
                         </div>
-                        <button id="registersubmit" type="submit" onclick=cb>{ "Register" }</button>
+                        <button id="registersubmit" type="submit" onclick={cb}>{ "Register" }</button>
                     </form>
-                    <p class="failuretext" style=if failure_text.len() == 0 { "display: none;" } else { "" }>{ failure_text }</p>
+                    <p class="failuretext" style={if failure_text.is_empty() { "display: none;" } else { "" }}>{ failure_text }</p>
                 </main>
             </>
         }

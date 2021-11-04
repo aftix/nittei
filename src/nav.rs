@@ -1,6 +1,6 @@
 use crate::app::AppRoute;
 use yew::prelude::*;
-use yew_router::components::RouterAnchor;
+use yew_router::components::Link;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum NavMsg {
@@ -14,7 +14,6 @@ pub struct NavProps {
 }
 
 pub struct Nav {
-    link: ComponentLink<Self>,
     props: NavProps,
     active: bool,
 }
@@ -23,15 +22,14 @@ impl Component for Nav {
     type Message = NavMsg;
     type Properties = NavProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         Self {
-            props,
-            link,
+            props: ctx.props().to_owned(),
             active: false,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             NavMsg::Hide => {
                 self.active = !self.active;
@@ -40,16 +38,7 @@ impl Component for Nav {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        if self.props != props {
-            self.props = props;
-            true
-        } else {
-            false
-        }
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let home_class = if self.props.route == AppRoute::Home {
             "navcurrent"
         } else {
@@ -90,21 +79,21 @@ impl Component for Nav {
         let login_text: String = AppRoute::Login.into();
 
         html! {
-            <nav class=nav_class>
-                <button onclick=self.link.callback(|_| NavMsg::Hide)>
+            <nav class={nav_class}>
+                <button onclick={ctx.link().callback(|_| NavMsg::Hide)}>
                     <img src="res/minilogo.svg" alt="Nittei Mini Logo" />
                 </button>
                 <ul>
-                    <li class=home_class><Anchor route=AppRoute::Home>{ home_text }</Anchor></li>
-                    <li class=track_class><Anchor route=AppRoute::Track>{ track_text }</Anchor></li>
-                    <li class=feed_class><Anchor route=AppRoute::Feed>{ feed_text }</Anchor></li>
-                    <li class=about_class><Anchor route=AppRoute::About>{ about_text }</Anchor></li>
-                    <li class=donate_class><Anchor route=AppRoute::Donate>{ donate_text }</Anchor></li>
-                    <li class=login_class><Anchor route=AppRoute::Login>{ login_text }</Anchor></li>
+                    <li class={home_class}><Anchor route={AppRoute::Home}>{ home_text }</Anchor></li>
+                    <li class={track_class}><Anchor route={AppRoute::Track}>{ track_text }</Anchor></li>
+                    <li class={feed_class}><Anchor route={AppRoute::Feed}>{ feed_text }</Anchor></li>
+                    <li class={about_class}><Anchor route={AppRoute::About}>{ about_text }</Anchor></li>
+                    <li class={donate_class}><Anchor route={AppRoute::Donate}>{ donate_text }</Anchor></li>
+                    <li class={login_class}><Anchor route={AppRoute::Login}>{ login_text }</Anchor></li>
                 </ul>
             </nav>
         }
     }
 }
 
-pub type Anchor = RouterAnchor<AppRoute>;
+pub type Anchor = Link<AppRoute>;

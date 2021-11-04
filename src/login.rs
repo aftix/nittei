@@ -9,7 +9,6 @@ use reqwasm::http::Request;
 use ron;
 use web_sys::{HtmlInputElement, MouseEvent};
 use yew::prelude::*;
-use yewtil::future::LinkFuture;
 
 #[derive(Clone, Debug)]
 pub enum LoginMsg {
@@ -46,7 +45,6 @@ impl Into<String> for LoginState {
 }
 
 pub struct Login {
-    link: ComponentLink<Self>,
     state: LoginState,
     userref: NodeRef,
     passref: NodeRef,
@@ -87,9 +85,8 @@ impl Component for Login {
     type Message = LoginMsg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            link,
             state: LoginState::Normal,
             userref: NodeRef::default(),
             passref: NodeRef::default(),
@@ -97,12 +94,12 @@ impl Component for Login {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             LoginMsg::Login => {
                 let userref = self.userref.clone();
                 let passref = self.passref.clone();
-                self.link.send_future(async move {
+                ctx.link().send_future(async move {
                     let userbox = userref.cast::<HtmlInputElement>();
                     let passbox = passref.cast::<HtmlInputElement>();
                     if userbox.is_none() || passbox.is_none() {
@@ -112,7 +109,7 @@ impl Component for Login {
                     let passbox = passbox.unwrap();
                     let username = userbox.value();
                     let password = passbox.value();
-                    if username.len() == 0 || password.len() == 0 {
+                    if username.is_empty() || password.is_empty() {
                         return LoginMsg::Missing;
                     }
                     login_request(username, password).await
@@ -124,6 +121,7 @@ impl Component for Login {
                 true
             }
             LoginMsg::LoginRecieved(resp) => {
+                console_web::log!("Login recieved!");
                 match resp {
                     LoginResponse::InvalidRequest => self.state = LoginState::Failed,
                     LoginResponse::LockedOut => self.state = LoginState::LockedOut,
@@ -144,18 +142,13 @@ impl Component for Login {
                                 if let Some(pass) = pass {
                                     if let Some(check) = checkbox {
                                         if check.checked() {
-                                            util::request_persistence(
-                                                user.value(),
-                                                pass.value(),
-                                                "/",
-                                            );
+                                            util::request_persistence(user.value(), pass.value());
                                         }
                                     }
                                 }
-                            } else {
-                                let window = web_sys::window().expect("No window exists");
-                                window.location().set_href("/").expect("Failed to navigate");
                             }
+
+                            yew_router::replace_route(AppRoute::Home);
                         }
                     }
                 };
@@ -172,39 +165,35 @@ impl Component for Login {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         // When the login button is clicked, don't submit the form, but message this component
-        let cb = self.link.callback(|e: MouseEvent| {
+        let cb = ctx.link().callback(|e: MouseEvent| {
             e.prevent_default();
             LoginMsg::Login
         });
         let failure_text: String = self.state.into(); // Error to display
         html! {
             <>
-                <Nav route=AppRoute::Login />
+                <Nav route={AppRoute::Login} />
                 <main id="login" class="content">
                     <form id="loginform">
                         <label for="unamebox">{ "Username" }</label>
-                        <input type="text" id="unamebox" name="username" ref=self.userref.clone() />
+                        <input type="text" id="unamebox" name="username" ref={self.userref.clone()} />
                         <label for="passbox">{ "Password" }</label>
-                        <input type="password" id="passbox" name="password" ref=self.passref.clone() />
+                        <input type="password" id="passbox" name="password" ref={self.passref.clone()} />
                         <div id="login-remember">
-                            <input type="checkbox" id="rememberme" name="rememberme" ref=self.rememberref.clone() />
+                            <input type="checkbox" id="rememberme" name="rememberme" ref={self.rememberref.clone()} />
                             <label for="rememberme">{ "Remember Me" }</label>
                         </div>
-                        <button id="loginsubmit" type="submit" onclick=cb>{ "Log In" }</button>
+                        <button id="loginsubmit" type="submit" onclick={cb}>{ "Log In" }</button>
                     </form>
                     // Only display error if text is not empty
-                    <p class="failuretext" style=if failure_text.len() == 0 { "display: none;" } else { "" }>
+                    <p class="failuretext" style={if failure_text.is_empty() { "display: none;" } else { "" }}>
                         { failure_text }
                     </p>
                     <p>
                         {"Don't have an account?"}
-                        <Anchor route=AppRoute::Register>{ "Sign Up" }</Anchor>
+                        <Anchor route={AppRoute::Register}>{ "Sign Up" }</Anchor>
                     </p>
                 </main>
             </>

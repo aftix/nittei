@@ -3,27 +3,21 @@ use yew::prelude::*;
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum WhatMsg {}
 
-pub struct What {
-    _link: ComponentLink<Self>,
-}
+pub struct What {}
 
 impl Component for What {
     type Message = WhatMsg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self { _link: link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Self {}
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
         false
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <section id="home-what">
                 <h1>{"What"}</h1>

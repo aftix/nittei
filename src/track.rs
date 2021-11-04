@@ -5,30 +5,24 @@ use yew::prelude::*;
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum TrackMsg {}
 
-pub struct Track {
-    _link: ComponentLink<Self>,
-}
+pub struct Track {}
 
 impl Component for Track {
     type Message = TrackMsg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self { _link: link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        Self {}
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
         false
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <>
-                <Nav route=AppRoute::Track />
+                <Nav route={AppRoute::Track} />
                 <main class="content" id="track">
                 </main>
             </>

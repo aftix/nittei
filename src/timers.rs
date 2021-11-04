@@ -6,9 +6,11 @@ use reqwasm::http::Request;
 use wasm_bindgen_futures::spawn_local;
 
 // Start a timer to refresh the session
+// Should be called just after a new token is gotten!
 pub fn session_refresh() {
-    // immediately refresh since time isn't implemented on WASM we can't tell if it's needed
+    // Renew the session in 4 minutes
     spawn_local(async move {
+        TimeoutFuture::new(1000 * 4 * 60).await;
         session_refresh_loop().await;
     });
 }

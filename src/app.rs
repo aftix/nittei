@@ -1,35 +1,35 @@
 use crate::home::Home;
 use crate::login::Login;
 use crate::register::Register;
-use crate::timers;
 use crate::track::Track;
+use crate::util;
 use html_escape::encode_text;
 use url_escape::decode;
 use yew::prelude::*;
-use yew_router::{prelude::*, route::Route, switch::Permissive, Switch};
+use yew_router::prelude::*;
 
 // All the routes available to the user
-#[derive(Switch, Clone, PartialEq)]
+#[derive(Routable, Clone, PartialEq)]
 pub enum AppRoute {
-    #[to = "/login"]
+    #[at("/login")]
     Login,
-    #[to = "/register"]
+    #[at("/register")]
     Register,
-    #[to = "/account"]
+    #[at("/account")]
     Account,
-    #[to = "/user/{username}"]
-    UserPage(String),
-    #[to = "/feed"]
+    #[at("/user/:username")]
+    UserPage { username: String },
+    #[at("/feed")]
     Feed,
-    #[to = "/about"]
+    #[at("/about")]
     About,
-    #[to = "/donate"]
+    #[at("/donate")]
     Donate,
-    #[to = "/track"]
+    #[at("/track")]
     Track,
-    #[to = "/404"]
-    PageNotFound(Permissive<String>),
-    #[to = "/!"]
+    #[at("/404")]
+    PageNotFound,
+    #[at("/")]
     Home,
 }
 
@@ -39,15 +39,13 @@ impl Into<String> for AppRoute {
             AppRoute::Login => String::from("Login"),
             AppRoute::Register => String::from("Register"),
             AppRoute::Account => String::from("Account"),
-            AppRoute::UserPage(s) => encode_text(&decode(&s)).to_string(),
+            AppRoute::UserPage { username: s } => encode_text(&decode(&s)).to_string(),
             AppRoute::Feed => String::from("Feed"),
             AppRoute::About => String::from("About"),
             AppRoute::Donate => String::from("Donate"),
             AppRoute::Track => String::from("Track"),
             AppRoute::Home => String::from("Home"),
-            AppRoute::PageNotFound(perm) => {
-                String::from(format!("PageNotFound {}", perm.0.unwrap()))
-            }
+            AppRoute::PageNotFound => String::from("Not Found"),
         }
     }
 }
@@ -59,47 +57,36 @@ pub type AppRouter = Router<AppRoute>;
 pub enum Msg {}
 
 // Overall page component containing everything else
-pub struct Main {
-    _link: ComponentLink<Self>,
-}
+pub struct Main {}
 
 impl Component for Main {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        // Start a time to refresh the session when page is first loaded
-        timers::session_refresh();
-        Main { _link: link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        util::try_login();
+        Self {}
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
         false
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         // Render whatever page the URL bar says to
         html! {
-            <AppRouter render=AppRouter::render(Self::switch) redirect=AppRouter::redirect(|route: Route| {
-                AppRoute::PageNotFound(Permissive(Some(route.route)))
-            }) />
+            <AppRouter render={AppRouter::render(switch)} />
         }
     }
 }
 
-impl Main {
-    // Display the right component based on what route is in use
-    fn switch(switch: AppRoute) -> Html {
-        match switch {
-            AppRoute::Home => html! { <Home /> },
-            AppRoute::Login => html! { <Login /> },
-            AppRoute::Register => html! { <Register /> },
-            AppRoute::Track => html! { <Track /> },
-            _ => html! { <Home /> },
-        }
+// Display the right component based on what route is in use
+fn switch(switch: &AppRoute) -> Html {
+    match switch {
+        AppRoute::Home => html! { <Home /> },
+        AppRoute::Login => html! { <Login /> },
+        AppRoute::Register => html! { <Register /> },
+        AppRoute::Track => html! { <Track /> },
+        _ => html! { <Home /> },
     }
 }
