@@ -1,4 +1,3 @@
-use crate::app::AppRoute;
 use crate::consts;
 use crate::timers;
 use gloo::storage::{self, LocalStorage, SessionStorage, Storage};
@@ -90,7 +89,7 @@ pub async fn try_login_persist() {
 
     // Have a remember me token, request a login
     let ron_req = PersistLoginRequest {
-        username: remember_me.user,
+        email: remember_me.email,
         token: remember_me.token,
     };
     let ron_req = ron::to_string(&ron_req);
@@ -138,17 +137,17 @@ pub fn logged_in() -> bool {
 
 #[derive(Serialize, Debug, Deserialize)]
 pub struct PersistentLogin {
-    user: String,
+    email: String,
     token: PersistToken,
 }
 
-pub fn request_persistence(username: String, password: String) {
+pub fn request_persistence(email: String, password: String) {
     spawn_local(async move {
-        request_persistence_inner(username, password).await;
+        request_persistence_inner(email, password).await;
     });
 }
 
-async fn request_persistence_inner(username: String, password: String) {
+async fn request_persistence_inner(email: String, password: String) {
     let jwt: storage::Result<AuthToken> = SessionStorage::get("session_key");
     if jwt.is_err() {
         console_web::error!("Persist: No session found.");
@@ -157,7 +156,7 @@ async fn request_persistence_inner(username: String, password: String) {
     let jwt = jwt.unwrap().to_string();
 
     let req = PersistRequest {
-        username: username.clone(),
+        email: email.clone(),
         password,
     };
     let req = ron::to_string(&req);
@@ -197,7 +196,7 @@ async fn request_persistence_inner(username: String, password: String) {
     }
     if let PersistResponse::Success(token) = resp.unwrap() {
         let persist = PersistentLogin {
-            user: username,
+            email: email,
             token,
         };
 

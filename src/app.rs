@@ -3,6 +3,7 @@ use crate::login::Login;
 use crate::register::Register;
 use crate::track::Track;
 use crate::util;
+use crate::verify::Verify;
 use html_escape::encode_text;
 use url_escape::decode;
 use yew::prelude::*;
@@ -11,6 +12,8 @@ use yew_router::prelude::*;
 // All the routes available to the user
 #[derive(Routable, Clone, PartialEq)]
 pub enum AppRoute {
+    #[at("/login/verify/:code")]
+    LoginVerify { code: u128 },
     #[at("/login")]
     Login,
     #[at("/register")]
@@ -19,6 +22,8 @@ pub enum AppRoute {
     Account,
     #[at("/user/:username")]
     UserPage { username: String },
+    #[at("/verify/:code")]
+    Verify { code: u128 },
     #[at("/feed")]
     Feed,
     #[at("/about")]
@@ -36,10 +41,12 @@ pub enum AppRoute {
 impl Into<String> for AppRoute {
     fn into(self) -> String {
         match self {
+            AppRoute::LoginVerify { code: _ } => String::from("Login"),
             AppRoute::Login => String::from("Login"),
             AppRoute::Register => String::from("Register"),
             AppRoute::Account => String::from("Account"),
             AppRoute::UserPage { username: s } => encode_text(&decode(&s)).to_string(),
+            AppRoute::Verify { code } => format!("verify {}", code.to_string()),
             AppRoute::Feed => String::from("Feed"),
             AppRoute::About => String::from("About"),
             AppRoute::Donate => String::from("Donate"),
@@ -84,8 +91,12 @@ impl Component for Main {
 fn switch(switch: &AppRoute) -> Html {
     match switch {
         AppRoute::Home => html! { <Home /> },
+        AppRoute::LoginVerify { code } => {
+            html! { <Login href={Some(AppRoute::Verify { code: *code })} /> }
+        }
         AppRoute::Login => html! { <Login /> },
         AppRoute::Register => html! { <Register /> },
+        AppRoute::Verify { code } => html! { <Verify code={*code} /> },
         AppRoute::Track => html! { <Track /> },
         _ => html! { <Home /> },
     }

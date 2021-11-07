@@ -19,6 +19,11 @@ pub enum LoginMsg {
     Missing,
 }
 
+#[derive(Properties, Clone, PartialEq)]
+pub struct LoginProps {
+    pub href: Option<AppRoute>,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum LoginState {
     Normal,
@@ -26,19 +31,19 @@ enum LoginState {
     Failed,
     Missing,
     LockedOut,
-    BadUser,
+    BadEmail,
     BadPassword,
 }
 
-impl Into<String> for LoginState {
-    fn into(self) -> String {
-        match self {
+impl From<LoginState> for String {
+    fn from(state: LoginState) -> String {
+        match state {
             LoginState::Normal => String::new(),
             LoginState::Disconnected => String::from("Disconnected from network"),
             LoginState::Failed => String::from("Internal Server Error"),
             LoginState::Missing => String::from("Missing field value!"),
             LoginState::LockedOut => String::from("Too many attempts. Please wait."),
-            LoginState::BadUser => String::from("Invalid username!"),
+            LoginState::BadEmail => String::from("Invalid email address!"),
             LoginState::BadPassword => String::from("Invalid password!"),
         }
     }
@@ -46,14 +51,15 @@ impl Into<String> for LoginState {
 
 pub struct Login {
     state: LoginState,
-    userref: NodeRef,
+    href: Option<AppRoute>,
+    emailref: NodeRef,
     passref: NodeRef,
     rememberref: NodeRef,
 }
 
 // use reqwasm to do a login API call
-async fn login_request(username: String, password: String) -> LoginMsg {
-    let ron_request = LoginRequest { username, password };
+async fn login_request(email: String, password: String) -> LoginMsg {
+    let ron_request = LoginRequest { email, password };
     let ron_request = ron::to_string(&ron_request).expect("Should serialize");
     let req = Request::post(&format!("{}/auth/login", consts::URL))
         .header("Content-Type", "application/x-login-request")
@@ -83,12 +89,13 @@ async fn login_request(username: String, password: String) -> LoginMsg {
 
 impl Component for Login {
     type Message = LoginMsg;
-    type Properties = ();
+    type Properties = LoginProps;
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         Self {
             state: LoginState::Normal,
-            userref: NodeRef::default(),
+            href: ctx.props().href.clone(),
+            emailref: NodeRef::default(),
             passref: NodeRef::default(),
             rememberref: NodeRef::default(),
         }
@@ -97,10 +104,10 @@ impl Component for Login {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             LoginMsg::Login => {
-                let userref = self.userref.clone();
+                let emailref = self.emailref.clone();
                 let passref = self.passref.clone();
                 ctx.link().send_future(async move {
-                    let userbox = userref.cast::<HtmlInputElement>();
+                    let userbox = emailref.cast::<HtmlInputElement>();
                     let passbox = passref.cast::<HtmlInputElement>();
                     if userbox.is_none() || passbox.is_none() {
                         return LoginMsg::LoginFailed;
@@ -121,12 +128,11 @@ impl Component for Login {
                 true
             }
             LoginMsg::LoginRecieved(resp) => {
-                console_web::log!("Login recieved!");
                 match resp {
                     LoginResponse::InvalidRequest => self.state = LoginState::Failed,
                     LoginResponse::LockedOut => self.state = LoginState::LockedOut,
                     LoginResponse::PasswordWrong => self.state = LoginState::BadPassword,
-                    LoginResponse::UsernameInvalid => self.state = LoginState::BadUser,
+                    LoginResponse::EmailInvalid => self.state = LoginState::BadEmail,
                     LoginResponse::Success(token, claim) => {
                         if SessionStorage::set("session_key", token).is_err()
                             || SessionStorage::set("session", claim).is_err()
@@ -135,7 +141,7 @@ impl Component for Login {
                         } else {
                             timers::session_refresh();
                             let checkbox = self.rememberref.cast::<HtmlInputElement>();
-                            let user = self.userref.cast::<HtmlInputElement>();
+                            let user = self.emailref.cast::<HtmlInputElement>();
                             let pass = self.passref.cast::<HtmlInputElement>();
 
                             if let Some(user) = user {
@@ -148,7 +154,7 @@ impl Component for Login {
                                 }
                             }
 
-                            yew_router::replace_route(AppRoute::Home);
+                            yew_router::replace_route(self.href.clone().unwrap_or(AppRoute::Home));
                         }
                     }
                 };
@@ -177,8 +183,8 @@ impl Component for Login {
                 <Nav route={AppRoute::Login} />
                 <main id="login" class="content">
                     <form id="loginform">
-                        <label for="unamebox">{ "Username" }</label>
-                        <input type="text" id="unamebox" name="username" ref={self.userref.clone()} />
+                        <label for="emailbox">{ "Email" }</label>
+                        <input type="text" id="emailbox" name="email" ref={self.emailref.clone()} />
                         <label for="passbox">{ "Password" }</label>
                         <input type="password" id="passbox" name="password" ref={self.passref.clone()} />
                         <div id="login-remember">

@@ -21,6 +21,9 @@ pub mod login;
 // Registration page
 pub mod register;
 
+// Email verification page
+pub mod verify;
+
 fn main() {
     yew::start_app::<app::Main>();
 }

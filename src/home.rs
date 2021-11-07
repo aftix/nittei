@@ -10,7 +10,7 @@ use action::*;
 use what::*;
 use why::*;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum HomeMsg {}
 
 pub struct Home {}

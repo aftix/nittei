@@ -9,7 +9,7 @@ edition = "2021"
 yew = {version="~0.18", git="https://github.com/yewstack/yew"}
 yew-router = {version="~0.15", git="https://github.com/yewstack/yew"}
 gloo = {version="~0.4", features=["futures"]}
-nittei-common = {version="~0.1.19", git="https://github.com/aftix/nittei-common"}
+nittei-common = {version="~0.5.0", git="https://github.com/aftix/nittei-common"}
 passwords = {version="~3.1", features=["common-password"]}
 email-address-parser = "~1.0"
 html-escape = "~0.2"

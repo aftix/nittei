@@ -81,7 +81,7 @@ impl Component for Nav {
         html! {
             <nav class={nav_class}>
                 <button onclick={ctx.link().callback(|_| NavMsg::Hide)}>
-                    <img src="res/minilogo.svg" alt="Nittei Mini Logo" />
+                    <img src="/res/minilogo.svg" alt="Nittei Mini Logo" />
                 </button>
                 <ul>
                     <li class={home_class}><Anchor route={AppRoute::Home}>{ home_text }</Anchor></li>

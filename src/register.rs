@@ -139,7 +139,7 @@ impl Component for Register {
                 let analyzed = analyzer::analyze(&password);
                 let scored = scorer::score(&analyzed);
 
-                if scored < 80.0 {
+                if scored < 70.0 {
                     self.state.badpassword = true;
                     fail = true;
                 }
